@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect } from "react";
 import Image from "next/image";
-import { Check } from "lucide-react";
 import { brandConfig } from "@/config/brand";
 import { useTelegram } from "@/hooks/useTelegram";
 
@@ -110,14 +109,14 @@ export function CategoryList({
 
   return (
     <div className="py-1 relative">
-      {/* Horizontal Scrollable Row with generous vertical headroom */}
+      {/* Horizontal Scrollable Row with ample vertical padding */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className="flex items-center gap-3.5 px-4 py-4 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
+        className="flex items-start gap-3.5 px-4 py-3 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
         style={{
           WebkitOverflowScrolling: "touch",
           scrollSnapType: "x proximity",
@@ -133,11 +132,12 @@ export function CategoryList({
               onClick={(e) => handleSelect(cat.id, e)}
               title={cat.name}
               aria-label={cat.name}
-              className="relative shrink-0 my-1 p-1 group focus:outline-hidden transition-all active:scale-95 scroll-snap-align-center"
+              className="flex flex-col items-center gap-1.5 shrink-0 group focus:outline-hidden transition-all active:scale-95 scroll-snap-align-center"
+              style={{ minWidth: "70px", maxWidth: "84px" }}
             >
-              {/* Circular Avatar with Filled Glowing Active Ring */}
+              {/* Circular Avatar: Clean food photo with Filled Glowing Active Ring, NO emoji */}
               <div
-                className={`relative w-[68px] h-[68px] rounded-full p-[3.5px] transition-all duration-300 flex items-center justify-center shrink-0 ${
+                className={`relative w-[64px] h-[64px] rounded-full p-[3px] transition-all duration-300 flex items-center justify-center shrink-0 ${
                   isActive
                     ? "shadow-lg shadow-red-600/40 scale-105 ring-2 ring-red-500/25"
                     : "bg-slate-200/90 border border-slate-300/40 group-hover:bg-slate-300"
@@ -164,30 +164,31 @@ export function CategoryList({
                     className={`object-cover rounded-full transition-transform duration-300 ${
                       isActive ? "scale-105" : "group-hover:scale-110"
                     }`}
-                    sizes="68px"
+                    sizes="64px"
                   />
 
                   {/* Subtle active warm overlay when selected */}
                   {isActive && (
                     <div className="absolute inset-0 bg-red-600/10 pointer-events-none" />
                   )}
-
-                  {/* Corner Badge: Solid filled red circle with checkmark if active, emoji if inactive */}
-                  <div
-                    className={`absolute bottom-0 right-0 w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white z-10 transition-all ${
-                      isActive
-                        ? "bg-red-600 text-white scale-110"
-                        : "bg-white text-slate-700 text-[10px]"
-                    }`}
-                  >
-                    {isActive ? (
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    ) : (
-                      <span>{cat.icon}</span>
-                    )}
-                  </div>
                 </div>
               </div>
+
+              {/* Category Name below the circle */}
+              <span
+                className={`text-[11px] text-center leading-tight transition-all duration-200 line-clamp-2 px-0.5 ${
+                  isActive
+                    ? "text-red-600 font-extrabold scale-105"
+                    : "text-slate-600 font-semibold group-hover:text-slate-900"
+                }`}
+              >
+                {cat.name}
+              </span>
+
+              {/* Active Indicator Dot */}
+              {isActive && (
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600 -mt-0.5 shadow-xs" />
+              )}
             </button>
           );
         })}

@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PlacedOrder } from "@/context/CartContext";
-import { brandConfig } from "@/config/brand";
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_ADMIN_CHAT_ID =
-  process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+const TELEGRAM_BOT_TOKEN =
+  process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN;
+const TELEGRAM_GROUP_ID =
+  process.env.TELEGRAM_ADMIN_CHAT_ID ||
+  process.env.TELEGRAM_CHAT_ID ||
+  process.env.TELEGRAM_GROUP_ID;
+
+// Helper to escape HTML characters in Telegram
+function escapeHtml(text: string | number | undefined): string {
+  if (text === undefined || text === null) return "";
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,55 +29,121 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Format rich Telegram notification message for the restaurant/courier group
+    // Clean phone number for tel: link (digits only with optional +)
+    const cleanPhone = (order.customerPhone || "").replace(/[^\d+]/g, "");
+
+    // Format item list in clean HTML
     const itemsList = order.items
       .map((item, idx) => {
-        const sizeStr = item.selectedSize ? ` (${item.selectedSize.name})` : "";
+        const sizeStr = item.selectedSize
+          ? ` <i>(${escapeHtml(item.selectedSize.name)})</i>`
+          : "";
         const addonsStr =
           item.selectedAddons.length > 0
-            ? `\n   + ${item.selectedAddons.map((a) => a.name).join(", ")}`
+            ? `\n   └ <i>+ ${item.selectedAddons
+                .map((a) => escapeHtml(a.name))
+                .join(", ")}</i>`
             : "";
-        return `${idx + 1}. *${item.quantity}x ${item.product.name}*${sizeStr}${addonsStr} — ${item.totalPrice.toLocaleString()} so'm`;
+        return `${idx + 1}. <b>${item.quantity}x ${escapeHtml(
+          item.product.name
+        )}</b>${sizeStr}${addonsStr}\n   💰 ${item.totalPrice.toLocaleString()} so'm`;
       })
-      .join("\n");
+      .join("\n\n");
 
-    const messageText =
-      `🔔 *YANGI BUYURTMA #${order.orderId}*\n\n` +
-      `👤 *Mijoz:* ${order.customerName}\n` +
-      `📞 *Telefon:* \`${order.customerPhone}\`\n` +
-      `🛵 *Buyurtma turi:* ${
-        order.orderType === "delivery" ? "Yetkazib berish" : "Kafedan olib ketish (-10%)"
-      }\n` +
-      `📍 *Manzil:* ${order.address}\n` +
-      (order.notes ? `📝 *Izoh:* ${order.notes}\n` : "") +
-      `💳 *To'lov usuli:* ${order.paymentMethod.toUpperCase()}\n\n` +
-      `📋 *Taomlar ro'yxati:*\n${itemsList}\n\n` +
-      `💵 *Taomlar:* ${order.subtotal.toLocaleString()} so'm\n` +
+    const orderTypeLabel =
+      order.orderType === "delivery"
+        ? "🛵 Yetkazib berish (Dostavka)"
+        : "🏪 Kafedan olib ketish (-10% chegirma)";
+
+    const paymentLabel =
+      order.paymentMethod === "click"
+        ? "🔵 CLICK"
+        : order.paymentMethod === "payme"
+        ? "🟢 PAYME"
+        : "💵 Naqd pul";
+
+    // Formatted Telegram message
+    const messageHtml =
+      `🔥 <b>YANGI BUYURTMA #${escapeHtml(order.orderId)}</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 <b>Mijoz:</b> ${escapeHtml(order.customerName)}\n` +
+      `📞 <b>Telefon:</b> <a href="tel:${cleanPhone}">${escapeHtml(
+        order.customerPhone
+      )}</a>\n` +
+      `🛵 <b>Buyurtma turi:</b> ${orderTypeLabel}\n` +
+      `📍 <b>Manzil:</b> ${escapeHtml(order.address)}\n` +
+      (order.notes ? `📝 <b>Izoh:</b> ${escapeHtml(order.notes)}\n` : "") +
+      `💳 <b>To'lov turi:</b> ${paymentLabel}\n\n` +
+      `📋 <b>BUYURTMA TARKIBI:</b>\n` +
+      `${itemsList}\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `💵 <b>Taomlar:</b> ${order.subtotal.toLocaleString()} so'm\n` +
       (order.deliveryFee > 0
-        ? `🛵 *Yetkazish:* ${order.deliveryFee.toLocaleString()} so'm\n`
-        : `🛵 *Yetkazish:* Bepul\n`) +
+        ? `🛵 <b>Yetkazish:</b> ${order.deliveryFee.toLocaleString()} so'm\n`
+        : `🛵 <b>Yetkazish:</b> <b>BEPUL</b> 🎉\n`) +
       (order.discount > 0
-        ? `🎁 *Chegirma:* -${order.discount.toLocaleString()} so'm\n`
+        ? `🎁 <b>Chegirma:</b> -${order.discount.toLocaleString()} so'm\n`
         : "") +
-      `💰 *JAMI TO'LOV: ${order.totalAmount.toLocaleString()} so'm*\n` +
-      `⏰ *Vaqt:* ${order.createdAt}`;
+      `💰 <b>JAMI TO'LOV: ${order.totalAmount.toLocaleString()} so'm</b>\n` +
+      `⏰ <b>Vaqt:</b> ${escapeHtml(order.createdAt)}`;
 
-    // If bot token and admin chat ID are set, deliver to Telegram
-    if (TELEGRAM_BOT_TOKEN && TELEGRAM_ADMIN_CHAT_ID) {
+    // Build interactive inline buttons
+    const inlineKeyboard: Array<Array<{ text: string; url?: string; callback_data?: string }>> = [];
+
+    // Row 1: Direct phone call and Location button
+    const row1: Array<{ text: string; url?: string }> = [];
+    if (cleanPhone) {
+      row1.push({
+        text: "📞 Qo'ng'iroq qilish",
+        url: `tel:${cleanPhone}`,
+      });
+    }
+    if (order.address && order.orderType === "delivery") {
+      row1.push({
+        text: "📍 Xaritada ko'rish",
+        url: `https://maps.google.com/?q=${encodeURIComponent(
+          order.address + ", Toshkent"
+        )}`,
+      });
+    }
+    if (row1.length > 0) inlineKeyboard.push(row1);
+
+    // Row 2: Status management buttons for Kitchen / Courier
+    inlineKeyboard.push([
+      {
+        text: "✅ Qabul qilish",
+        callback_data: `accept_${order.orderId}`,
+      },
+      {
+        text: "🛵 Kuryerga berish",
+        callback_data: `courier_${order.orderId}`,
+      },
+    ]);
+
+    // Send to Telegram group if token and group ID are configured
+    if (TELEGRAM_BOT_TOKEN && TELEGRAM_GROUP_ID) {
       const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-      await fetch(telegramUrl, {
+      const res = await fetch(telegramUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chat_id: TELEGRAM_ADMIN_CHAT_ID,
-          text: messageText,
-          parse_mode: "Markdown",
+          chat_id: TELEGRAM_GROUP_ID,
+          text: messageHtml,
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: inlineKeyboard,
+          },
         }),
       });
+
+      const resData = await res.json();
+      if (!resData.ok) {
+        console.error("Telegram API Error:", resData);
+      }
     } else {
       console.log(
-        "[Demo Order Notice] Telegram admin chat not configured. Simulated order received:\n",
-        messageText
+        "[Telegram Group Notice] Telegram bot token or group ID not configured. Order simulated:\n",
+        messageHtml
       );
     }
 

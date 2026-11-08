@@ -22,9 +22,10 @@ import { HojiBoboLogo } from "@/components/HojiBoboLogo";
 interface ProfileViewProps {
   onOpenAddressModal: () => void;
   onExploreMenu: () => void;
+  onOpenOnboarding?: () => void;
 }
 
-export function ProfileView({ onOpenAddressModal, onExploreMenu }: ProfileViewProps) {
+export function ProfileView({ onOpenAddressModal, onExploreMenu, onOpenOnboarding }: ProfileViewProps) {
   const { orders, selectedAddress } = useCart();
   const { user, triggerHaptic } = useTelegram();
 
@@ -195,6 +196,27 @@ export function ProfileView({ onOpenAddressModal, onExploreMenu }: ProfileViewPr
             </div>
           </div>
         </div>
+
+        {onOpenOnboarding && (
+          <button
+            onClick={() => {
+              triggerHaptic("light");
+              onOpenOnboarding();
+            }}
+            className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">
+                ✨
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-800">Ilova tanishuvi (Onboarding)</div>
+                <div className="text-[11px] text-slate-400">Kirish va yangiliklar lavhalari</div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400" />
+          </button>
+        )}
       </div>
 
       {/* Brand Footer */}

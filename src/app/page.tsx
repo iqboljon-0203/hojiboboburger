@@ -19,6 +19,7 @@ import { FavoritesView } from "@/components/FavoritesView";
 import { ProfileView } from "@/components/ProfileView";
 import { MenuView } from "@/components/MenuView";
 import { ActiveOrderTracker } from "@/components/ActiveOrderTracker";
+import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { useTelegram } from "@/hooks/useTelegram";
 
 function MainContent() {
@@ -30,11 +31,24 @@ function MainContent() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
 
-  // Modals state
+  // Modals & Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [activeProductForModal, setActiveProductForModal] = useState<Product | null>(null);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [lastPlacedOrder, setLastPlacedOrder] = useState<PlacedOrder | null>(null);
+
+  // Check if first-time user for Onboarding flow
+  React.useEffect(() => {
+    try {
+      const hasOnboarded = localStorage.getItem("hojibobo_onboarded");
+      if (!hasOnboarded) {
+        setShowOnboarding(true);
+      }
+    } catch (e) {
+      // Ignored
+    }
+  }, []);
 
   // Manage native Telegram BackButton
   React.useEffect(() => {
@@ -112,6 +126,7 @@ function MainContent() {
         onOpenAddressModal={() => setIsAddressModalOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
         onNavigateTab={(tab) => setCurrentTab(tab)}
+        onOpenOnboarding={() => setShowOnboarding(true)}
       />
 
       {/* 2. Main Tab View Router */}
@@ -268,6 +283,7 @@ function MainContent() {
         <ProfileView
           onOpenAddressModal={() => setIsAddressModalOpen(true)}
           onExploreMenu={() => setCurrentTab("menu")}
+          onOpenOnboarding={() => setShowOnboarding(true)}
         />
       )}
 
@@ -297,7 +313,13 @@ function MainContent() {
         onClose={() => setLastPlacedOrder(null)}
       />
 
-      {/* 10. Fixed Bottom Navigation Bar */}
+      {/* 10. Intro Splash & Onboarding Flow */}
+      <OnboardingFlow
+        isOpen={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+      />
+
+      {/* 11. Fixed Bottom Navigation Bar */}
       <BottomNavigation
         currentTab={currentTab}
         onSelectTab={setCurrentTab}

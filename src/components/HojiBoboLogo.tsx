@@ -159,3 +159,4 @@ export function HojiBoboLogo({ className = "", size = 48 }: HojiBoboLogoProps) {
     </svg>
   );
 }
+

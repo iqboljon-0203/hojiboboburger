@@ -24,12 +24,14 @@ interface HeaderProps {
   onOpenAddressModal: () => void;
   onOpenCart: () => void;
   onNavigateTab: (tab: "home" | "menu" | "orders" | "favorites" | "profile") => void;
+  onOpenOnboarding?: () => void;
 }
 
 export function Header({
   onOpenAddressModal,
   onOpenCart,
   onNavigateTab,
+  onOpenOnboarding,
 }: HeaderProps) {
   const { totalCount, selectedAddress, orders } = useCart();
   const { triggerHaptic, user } = useTelegram();
@@ -40,39 +42,37 @@ export function Header({
     <>
       <header className="pt-3 px-4 pb-2 bg-[#FBF9F5] sticky top-0 z-30 transition-all">
         {/* Top bar */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Menu button with mini logo */}
+        <div className="flex items-center justify-between gap-3">
+          {/* Left: Brand Identity (Logo + Name & Greeting) */}
           <button
             onClick={() => {
               triggerHaptic("light");
               setShowInfoDrawer(true);
             }}
-            className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-transform overflow-hidden p-1.5"
-            aria-label="Menyu"
+            className="flex items-center gap-2.5 min-w-0 text-left active:scale-[0.98] transition-transform group"
+            aria-label="Brend ma'lumotlari"
           >
-            <HojiBoboLogo size={28} />
+            <div className="w-11 h-11 rounded-2xl bg-stone-900 p-0.5 shadow-md shadow-stone-900/20 ring-1 ring-stone-800 flex items-center justify-center shrink-0">
+              <HojiBoboLogo size={38} />
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-slate-900 uppercase leading-none">
+                  HOJI<span className="text-red-600">BOBO</span>
+                </span>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-stone-900 text-amber-400 uppercase tracking-wider">
+                  GRILL
+                </span>
+              </div>
+              <p className="text-[11px] font-semibold text-slate-500 mt-1 truncate">
+                {user ? `Salom, ${user.first_name}! 👋` : "Xush kelibsiz! 🔥"}
+              </p>
+            </div>
           </button>
 
-          {/* Brand & Greeting */}
-          <div className="flex-1 text-center px-1">
-            <p className="text-[11px] font-semibold text-amber-900 flex items-center justify-center gap-1">
-              <span>{user ? `Salom, ${user.first_name}! 👋` : brandConfig.brandGreeting}</span>
-            </p>
-            <div className="flex items-center justify-center gap-1.5 mt-0.5">
-              <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 uppercase">
-                HOJI<span className="text-red-600">BOBO</span>
-              </h1>
-              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-md bg-stone-900 text-amber-400 uppercase tracking-wider">
-                Josper Grill
-              </span>
-            </div>
-            <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider -mt-0.5">
-              {brandConfig.brandSubName}
-            </p>
-          </div>
-
           {/* Right Action Icons: Bell & Cart */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Bell button */}
             <button
               onClick={() => {
@@ -260,6 +260,18 @@ export function Header({
                 >
                   ❤️ Saralangan Taomlar
                 </button>
+                {onOpenOnboarding && (
+                  <button
+                    onClick={() => {
+                      setShowInfoDrawer(false);
+                      onOpenOnboarding();
+                    }}
+                    className="w-full text-left py-2 px-3 rounded-xl hover:bg-amber-50 font-semibold text-slate-700 hover:text-amber-700 text-xs flex items-center justify-between"
+                  >
+                    <span>🎬 Ilova tanishuvi (Onboarding)</span>
+                    <span className="text-[10px] text-amber-600 font-bold">Ko&apos;rish</span>
+                  </button>
+                )}
               </div>
             </div>
 

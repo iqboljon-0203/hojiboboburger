@@ -88,7 +88,10 @@ export function ProductDetailModal({
         {/* Scrollable Content */}
         <div className="overflow-y-auto px-5 pb-28 pt-1 no-scrollbar space-y-4">
           {/* Hero Image Container */}
-          <div className="relative w-full aspect-video sm:aspect-4/3 rounded-2xl overflow-hidden bg-slate-100 shadow-inner">
+          <div
+            style={{ position: "relative" }}
+            className="w-full aspect-video sm:aspect-4/3 rounded-2xl overflow-hidden bg-slate-100 shadow-inner"
+          >
             <Image
               src={product.image}
               alt={product.name}

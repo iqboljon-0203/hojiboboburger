@@ -75,7 +75,10 @@ export function HeroCarousel({ onSelectCategory, onCtaClick }: HeroCarouselProps
 
         {/* Floating food image on the right */}
         <div className="absolute right-0 bottom-0 top-0 w-2/5 flex items-center justify-center p-2 pointer-events-none">
-          <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-2xl ring-4 ring-white/10 transform translate-x-2 translate-y-1">
+          <div
+            style={{ position: "relative" }}
+            className="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-2xl ring-4 ring-white/10 transform translate-x-2 translate-y-1"
+          >
             <Image
               src={banner.image}
               alt={banner.title}

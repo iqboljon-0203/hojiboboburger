@@ -112,7 +112,10 @@ export function ProductCard({ product, onOpenDetails }: ProductCardProps) {
 
       {/* Image container */}
       <div>
-        <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-2.5">
+        <div
+          style={{ position: "relative" }}
+          className="w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-2.5"
+        >
           <Image
             src={product.image}
             alt={product.name}

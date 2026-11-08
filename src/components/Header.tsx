@@ -49,7 +49,10 @@ export function Header({
             className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-transform overflow-hidden relative"
             aria-label="Menyu"
           >
-            <div className="relative w-6 h-6 rounded-full overflow-hidden">
+            <div
+              style={{ position: "relative" }}
+              className="w-6 h-6 rounded-full overflow-hidden"
+            >
               <Image
                 src={brandConfig.logoUrl}
                 alt={brandConfig.brandName}
@@ -160,7 +163,10 @@ export function Header({
               {/* Brand Header with Logo */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-md ring-2 ring-stone-900 shrink-0">
+                  <div
+                    style={{ position: "relative" }}
+                    className="w-11 h-11 rounded-2xl overflow-hidden shadow-md ring-2 ring-stone-900 shrink-0"
+                  >
                     <Image
                       src={brandConfig.logoUrl}
                       alt={brandConfig.brandName}

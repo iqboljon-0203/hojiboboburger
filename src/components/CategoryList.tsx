@@ -40,7 +40,10 @@ export function CategoryList({
                     : "ring-1 ring-slate-200/80 group-hover:ring-orange-300"
                 }`}
               >
-                <div className="w-full h-full rounded-full overflow-hidden bg-white shadow-xs relative">
+                <div
+                  style={{ position: "relative" }}
+                  className="w-full h-full rounded-full overflow-hidden bg-white shadow-xs"
+                >
                   <Image
                     src={cat.image}
                     alt={cat.name}

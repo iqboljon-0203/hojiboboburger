@@ -236,7 +236,10 @@ export function CartDrawer({
                   key={item.id}
                   className="bg-slate-50 rounded-2xl p-2.5 flex items-center gap-3 border border-slate-100/80"
                 >
-                  <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white">
+                  <div
+                    style={{ position: "relative" }}
+                    className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white"
+                  >
                     <Image
                       src={item.product.image}
                       alt={item.product.name}

@@ -4,9 +4,11 @@ import path from "path";
 import { brandConfig } from "@/config/brand";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const APP_URL =
+// Clean URL without trailing slash for reliable path concatenation
+const RAW_APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://t.me");
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://hojiboboburger.vercel.app");
+const APP_URL = RAW_APP_URL.replace(/\/+$/, "");
 
 export async function GET() {
   return NextResponse.json({
@@ -96,9 +98,11 @@ export async function POST(req: NextRequest) {
         `🍔 <b>${brandConfig.brandName}</b> ga xush kelibsiz, ${user?.first_name || "Aziz mehmon"}!\n\n` +
         `🔥 <b>Josper Grill</b> — haqiqiy ko'mir taftida pishirilgan ASL shira bosgan burgerlar va taomlar!\n` +
         `🚀 <b>Tezkor yetkazib berish:</b> 30-35 daqiqa\n` +
-        `🎁 <b>Aksiya:</b> 70 000 so'mdan yuqori buyurtmalar uchun yetkazib berish <b>bepul</b>!\n\n` +
+        `🎁 <b>Aksiya:</b> 70 000 so'mdan yuqori buyurtmalar uchun yetkazib berish <b>bepul</b>!\n` +
+        `📞 <b>Aloqa:</b> ${brandConfig.phoneNumber}\n\n` +
         `Quyidagi tugma orqali ilovani oching va issiq burgerlarni tanlang:`;
 
+      // IMPORTANT: In Telegram InlineKeyboards, 'url' MUST be an http/https or tg:// URL. Never use 'tel:'.
       const inlineKeyboard = {
         inline_keyboard: [
           [
@@ -109,52 +113,77 @@ export async function POST(req: NextRequest) {
           ],
           [
             {
-              text: "📞 Aloqa",
-              url: `tel:${brandConfig.phoneNumber.replace(/[^\d+]/g, "")}`,
+              text: "📍 Manzilimiz (Xarita)",
+              url: "https://maps.google.com/?q=HojiBobo+Burger+Toshkent",
             },
             {
-              text: "📍 Manzilimiz",
-              url: "https://maps.google.com/?q=HojiBobo+Burger+Toshkent",
+              text: "📸 Instagram",
+              url: `https://instagram.com/${brandConfig.instagram.replace("@", "")}`,
             },
           ],
         ],
       };
 
-      // Check for welcome image on disk
-      const photoPath = path.join(process.cwd(), "public", "images", "bot-welcome.jpg");
+      const photoUrl = `${APP_URL}/images/bot-welcome.jpg`;
       let photoSent = false;
 
-      if (fs.existsSync(photoPath)) {
-        try {
-          const imageBuffer = fs.readFileSync(photoPath);
-          const formData = new FormData();
-          formData.append("chat_id", String(chatId));
-          formData.append(
-            "photo",
-            new Blob([imageBuffer], { type: "image/jpeg" }),
-            "hojibobo-welcome.jpg"
-          );
-          formData.append("caption", welcomeText);
-          formData.append("parse_mode", "HTML");
-          formData.append("reply_markup", JSON.stringify(inlineKeyboard));
+      // 1. Try sending photo via public URL (Telegram fetches directly over HTTPS)
+      try {
+        const photoResp = await fetch(`${telegramApiUrl}/sendPhoto`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            photo: photoUrl,
+            caption: welcomeText,
+            parse_mode: "HTML",
+            reply_markup: inlineKeyboard,
+          }),
+        });
+        const photoData = await photoResp.json();
+        if (photoData.ok) {
+          photoSent = true;
+        } else {
+          console.warn("sendPhoto via URL failed:", photoData);
+        }
+      } catch (err) {
+        console.warn("sendPhoto URL fetch error:", err);
+      }
 
-          const photoResp = await fetch(`${telegramApiUrl}/sendPhoto`, {
-            method: "POST",
-            body: formData,
-          });
+      // 2. If URL send failed (e.g. localhost testing), try local file upload via FormData
+      if (!photoSent) {
+        const photoPath = path.join(process.cwd(), "public", "images", "bot-welcome.jpg");
+        if (fs.existsSync(photoPath)) {
+          try {
+            const imageBuffer = fs.readFileSync(photoPath);
+            const formData = new FormData();
+            formData.append("chat_id", String(chatId));
+            formData.append(
+              "photo",
+              new Blob([imageBuffer], { type: "image/jpeg" }),
+              "welcome.jpg"
+            );
+            formData.append("caption", welcomeText);
+            formData.append("parse_mode", "HTML");
+            formData.append("reply_markup", JSON.stringify(inlineKeyboard));
 
-          const photoData = await photoResp.json();
-          if (photoData.ok) {
-            photoSent = true;
-          } else {
-            console.warn("sendPhoto response error:", photoData);
+            const localResp = await fetch(`${telegramApiUrl}/sendPhoto`, {
+              method: "POST",
+              body: formData,
+            });
+            const localData = await localResp.json();
+            if (localData.ok) {
+              photoSent = true;
+            } else {
+              console.warn("sendPhoto via local file failed:", localData);
+            }
+          } catch (localErr) {
+            console.warn("sendPhoto local buffer error:", localErr);
           }
-        } catch (photoErr) {
-          console.warn("Failed to send welcome photo:", photoErr);
         }
       }
 
-      // Fallback to text message if photo was not sent
+      // 3. Fallback to clean text message if photo could not be delivered
       if (!photoSent) {
         await fetch(`${telegramApiUrl}/sendMessage`, {
           method: "POST",
@@ -168,7 +197,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Send persistent bottom keyboard button
+      // 4. Send persistent bottom keyboard button
       await fetch(`${telegramApiUrl}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

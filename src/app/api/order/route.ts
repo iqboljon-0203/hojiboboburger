@@ -87,26 +87,20 @@ export async function POST(req: NextRequest) {
       `💰 <b>JAMI TO'LOV: ${order.totalAmount.toLocaleString()} so'm</b>\n` +
       `⏰ <b>Vaqt:</b> ${escapeHtml(order.createdAt)}`;
 
-    // Build interactive inline buttons
+    // Build interactive inline buttons (NOTE: Telegram inline_keyboard only supports http/https/tg URLs)
     const inlineKeyboard: Array<Array<{ text: string; url?: string; callback_data?: string }>> = [];
 
-    // Row 1: Direct phone call and Location button
-    const row1: Array<{ text: string; url?: string }> = [];
-    if (cleanPhone) {
-      row1.push({
-        text: "📞 Qo'ng'iroq qilish",
-        url: `tel:${cleanPhone}`,
-      });
-    }
+    // Row 1: Map location button if address exists
     if (order.address && order.orderType === "delivery") {
-      row1.push({
-        text: "📍 Xaritada ko'rish",
-        url: `https://maps.google.com/?q=${encodeURIComponent(
-          order.address + ", Toshkent"
-        )}`,
-      });
+      inlineKeyboard.push([
+        {
+          text: "📍 Xaritada ko'rish (Lokatsiya)",
+          url: `https://maps.google.com/?q=${encodeURIComponent(
+            order.address + ", Toshkent"
+          )}`,
+        },
+      ]);
     }
-    if (row1.length > 0) inlineKeyboard.push(row1);
 
     // Row 2: Status management buttons for Kitchen / Courier
     inlineKeyboard.push([

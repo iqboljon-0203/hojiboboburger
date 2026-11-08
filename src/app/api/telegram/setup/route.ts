@@ -149,8 +149,8 @@ export async function POST(req: NextRequest) {
         inline_keyboard: [
           [
             {
-              text: "📞 Mijozga qo'ng'iroq",
-              url: "tel:+998901234567",
+              text: "📍 Xaritada ko'rish (Lokatsiya)",
+              url: "https://maps.google.com/?q=Toshkent",
             },
           ],
           [

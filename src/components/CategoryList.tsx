@@ -109,15 +109,15 @@ export function CategoryList({
   };
 
   return (
-    <div className="py-2.5 relative">
-      {/* Horizontal Scrollable Row without arrow buttons and without bottom texts */}
+    <div className="py-1 relative">
+      {/* Horizontal Scrollable Row with ample vertical padding to prevent clipping */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className="flex items-center gap-3.5 px-4 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
+        className="flex items-center gap-3.5 px-4 py-3.5 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
         style={{
           WebkitOverflowScrolling: "touch",
           scrollSnapType: "x proximity",
@@ -133,13 +133,13 @@ export function CategoryList({
               onClick={(e) => handleSelect(cat.id, e)}
               title={cat.name}
               aria-label={cat.name}
-              className="relative shrink-0 group focus:outline-hidden transition-all active:scale-95 scroll-snap-align-center"
+              className="relative shrink-0 p-1 group focus:outline-hidden transition-all active:scale-95 scroll-snap-align-center"
             >
               {/* Circular Avatar with Filled Glowing Active Ring */}
               <div
                 className={`relative w-[68px] h-[68px] rounded-full p-[3.5px] transition-all duration-300 flex items-center justify-center shrink-0 ${
                   isActive
-                    ? "shadow-lg shadow-red-600/45 scale-110 ring-2 ring-red-500/30"
+                    ? "shadow-lg shadow-red-600/40 scale-105 ring-2 ring-red-500/25"
                     : "bg-slate-200/90 border border-slate-300/40 group-hover:bg-slate-300"
                 }`}
                 style={

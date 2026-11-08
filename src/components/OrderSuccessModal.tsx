@@ -6,6 +6,7 @@ import { PlacedOrder } from "@/context/CartContext";
 import { brandConfig } from "@/config/brand";
 import { formatPrice } from "@/utils/format";
 import { useTelegram } from "@/hooks/useTelegram";
+import { HojiBoboLogo } from "@/components/HojiBoboLogo";
 
 interface OrderSuccessModalProps {
   order: PlacedOrder | null;
@@ -29,8 +30,8 @@ export function OrderSuccessModal({ order, onClose }: OrderSuccessModalProps) {
       <div className="relative bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         {/* Celebration header */}
         <div className="text-center pt-2">
-          <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-inner ring-4 ring-emerald-50">
-            <CheckCircle2 className="w-8 h-8" />
+          <div className="flex justify-center mb-2">
+            <HojiBoboLogo size={52} className="shadow-lg rounded-full" />
           </div>
           <span className="text-[10px] font-bold text-emerald-600 tracking-wider uppercase bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
             Muvaffaqiyatli qabul qilindi

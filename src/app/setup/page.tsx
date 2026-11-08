@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, AlertCircle, Send, Globe, Key, ShieldCheck, Loader2 } from "lucide-react";
 import { brandConfig } from "@/config/brand";
+import { HojiBoboLogo } from "@/components/HojiBoboLogo";
 
 export default function SetupPage() {
   const [botToken, setBotToken] = useState("");
@@ -145,13 +146,16 @@ export default function SetupPage() {
           </span>
         </div>
 
-        <div>
-          <h1 className="text-lg font-black text-slate-900">
-            🤖 Telegram Webhook Sozlash
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            {brandConfig.brandName} botini hech qanday buyruq va curl ishlatmasdan 1 marta bosishda ulang.
-          </p>
+        <div className="flex items-center gap-3">
+          <HojiBoboLogo size={44} />
+          <div>
+            <h1 className="text-base font-black text-slate-900 leading-tight">
+              Telegram Webhook Sozlash
+            </h1>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              {brandConfig.brandName} botini 1 marta bosishda ulang.
+            </p>
+          </div>
         </div>
 
         {/* Inputs */}
@@ -244,3 +248,4 @@ export default function SetupPage() {
     </div>
   );
 }
+

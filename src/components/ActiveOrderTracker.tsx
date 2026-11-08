@@ -73,3 +73,4 @@ export function ActiveOrderTracker({ order, onOpenDetails }: ActiveOrderTrackerP
     </div>
   );
 }
+

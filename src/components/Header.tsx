@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { brandConfig } from "@/config/brand";
+import { HojiBoboLogo } from "@/components/HojiBoboLogo";
 import { useCart } from "@/context/CartContext";
 import { useTelegram } from "@/hooks/useTelegram";
 import {
@@ -46,21 +47,10 @@ export function Header({
               triggerHaptic("light");
               setShowInfoDrawer(true);
             }}
-            className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-transform overflow-hidden relative"
+            className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-transform overflow-hidden p-1.5"
             aria-label="Menyu"
           >
-            <div
-              style={{ position: "relative" }}
-              className="w-6 h-6 rounded-full overflow-hidden"
-            >
-              <Image
-                src={brandConfig.logoUrl}
-                alt={brandConfig.brandName}
-                fill
-                className="object-cover"
-                sizes="24px"
-              />
-            </div>
+            <HojiBoboLogo size={28} />
           </button>
 
           {/* Brand & Greeting */}
@@ -163,17 +153,8 @@ export function Header({
               {/* Brand Header with Logo */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div
-                    style={{ position: "relative" }}
-                    className="w-11 h-11 rounded-2xl overflow-hidden shadow-md ring-2 ring-stone-900 shrink-0"
-                  >
-                    <Image
-                      src={brandConfig.logoUrl}
-                      alt={brandConfig.brandName}
-                      fill
-                      className="object-cover"
-                      sizes="44px"
-                    />
+                  <div className="shrink-0 shadow-md rounded-full overflow-hidden">
+                    <HojiBoboLogo size={46} />
                   </div>
                   <div>
                     <h3 className="font-extrabold text-slate-900 text-sm leading-tight">

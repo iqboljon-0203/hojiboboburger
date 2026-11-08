@@ -17,6 +17,7 @@ import { useCart } from "@/context/CartContext";
 import { useTelegram } from "@/hooks/useTelegram";
 import { brandConfig } from "@/config/brand";
 import { formatPrice } from "@/utils/format";
+import { HojiBoboLogo } from "@/components/HojiBoboLogo";
 
 interface ProfileViewProps {
   onOpenAddressModal: () => void;
@@ -198,6 +199,9 @@ export function ProfileView({ onOpenAddressModal, onExploreMenu }: ProfileViewPr
 
       {/* Brand Footer */}
       <div className="text-center pt-2 text-[10px] text-slate-400 space-y-1">
+        <div className="flex justify-center pb-1">
+          <HojiBoboLogo size={42} />
+        </div>
         <p className="font-extrabold text-slate-600">
           {brandConfig.brandName} • {brandConfig.brandSubName}
         </p>

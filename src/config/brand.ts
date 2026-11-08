@@ -94,7 +94,7 @@ export const brandConfig: BrandConfig = {
   phoneNumber: "+998 90 999 77 77",
   instagram: "@hojibobo_burger.uz",
   telegramChannel: "@hojibobo_burger",
-  logoUrl: "/images/hojibobo-logo.jpg",
+  logoUrl: "/images/hojibobo-logo.svg",
   theme: {
     primary: "#DC2626", // Flame red matching HojiBobo logo
     primaryHover: "#B91C1C",

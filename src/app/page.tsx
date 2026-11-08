@@ -18,8 +18,13 @@ import { BottomNavigation, NavTab } from "@/components/BottomNavigation";
 import { FavoritesView } from "@/components/FavoritesView";
 import { ProfileView } from "@/components/ProfileView";
 import { MenuView } from "@/components/MenuView";
+import { ActiveOrderTracker } from "@/components/ActiveOrderTracker";
+import { useTelegram } from "@/hooks/useTelegram";
 
 function MainContent() {
+  const { orders } = useCart();
+  const { showBackButton, hideBackButton } = useTelegram();
+
   const [currentTab, setCurrentTab] = useState<NavTab>("home");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -30,6 +35,42 @@ function MainContent() {
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [lastPlacedOrder, setLastPlacedOrder] = useState<PlacedOrder | null>(null);
+
+  // Manage native Telegram BackButton
+  React.useEffect(() => {
+    const hasOpenModal =
+      Boolean(activeProductForModal) ||
+      isAddressModalOpen ||
+      isCartOpen ||
+      Boolean(lastPlacedOrder) ||
+      currentTab !== "home";
+
+    if (hasOpenModal) {
+      showBackButton(() => {
+        if (activeProductForModal) {
+          setActiveProductForModal(null);
+        } else if (isAddressModalOpen) {
+          setIsAddressModalOpen(false);
+        } else if (isCartOpen) {
+          setIsCartOpen(false);
+        } else if (lastPlacedOrder) {
+          setLastPlacedOrder(null);
+        } else if (currentTab !== "home") {
+          setCurrentTab("home");
+        }
+      });
+    } else {
+      hideBackButton();
+    }
+  }, [
+    activeProductForModal,
+    isAddressModalOpen,
+    isCartOpen,
+    lastPlacedOrder,
+    currentTab,
+    showBackButton,
+    hideBackButton,
+  ]);
 
   // Filtered products logic for Home tab
   const filteredProducts = brandConfig.products.filter((p) => {
@@ -83,6 +124,14 @@ function MainContent() {
             selectedFilter={selectedFilter}
             onFilterChange={setSelectedFilter}
           />
+
+          {/* Active Order Live Tracker */}
+          {orders.length > 0 && (
+            <ActiveOrderTracker
+              order={orders[0]}
+              onOpenDetails={(ord) => setLastPlacedOrder(ord)}
+            />
+          )}
 
           {/* Hero Promo Carousel (Matches KFC reference style) */}
           <HeroCarousel

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { TelegramUser, TelegramWebApp } from "@/types/telegram";
 
 export function useTelegram() {
   const [tg, setTg] = useState<TelegramWebApp | null>(null);
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const backButtonCallbackRef = useRef<(() => void) | null>(null);
+  const mainButtonCallbackRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.Telegram?.WebApp) {
@@ -70,6 +72,31 @@ export function useTelegram() {
     [tg]
   );
 
+  // Native BackButton handler
+  const showBackButton = useCallback(
+    (onBack: () => void) => {
+      if (tg?.BackButton) {
+        if (backButtonCallbackRef.current) {
+          tg.BackButton.offClick(backButtonCallbackRef.current);
+        }
+        backButtonCallbackRef.current = onBack;
+        tg.BackButton.onClick(onBack);
+        tg.BackButton.show();
+      }
+    },
+    [tg]
+  );
+
+  const hideBackButton = useCallback(() => {
+    if (tg?.BackButton) {
+      if (backButtonCallbackRef.current) {
+        tg.BackButton.offClick(backButtonCallbackRef.current);
+        backButtonCallbackRef.current = null;
+      }
+      tg.BackButton.hide();
+    }
+  }, [tg]);
+
   return {
     tg,
     user,
@@ -79,5 +106,7 @@ export function useTelegram() {
     triggerNotification,
     closeApp,
     sendDataToBot,
+    showBackButton,
+    hideBackButton,
   };
 }

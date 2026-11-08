@@ -110,14 +110,14 @@ export function CategoryList({
 
   return (
     <div className="py-1 relative">
-      {/* Horizontal Scrollable Row with ample vertical padding to prevent clipping */}
+      {/* Horizontal Scrollable Row with generous vertical headroom */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className="flex items-center gap-3.5 px-4 py-3.5 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
+        className="flex items-center gap-3.5 px-4 py-4 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
         style={{
           WebkitOverflowScrolling: "touch",
           scrollSnapType: "x proximity",
@@ -133,7 +133,7 @@ export function CategoryList({
               onClick={(e) => handleSelect(cat.id, e)}
               title={cat.name}
               aria-label={cat.name}
-              className="relative shrink-0 p-1 group focus:outline-hidden transition-all active:scale-95 scroll-snap-align-center"
+              className="relative shrink-0 my-1 p-1 group focus:outline-hidden transition-all active:scale-95 scroll-snap-align-center"
             >
               {/* Circular Avatar with Filled Glowing Active Ring */}
               <div

@@ -150,6 +150,24 @@ export function ProfileView({ onOpenAddressModal, onExploreMenu }: ProfileViewPr
         </button>
 
         <a
+          href={`https://instagram.com/${brandConfig.instagram.replace('@', '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center">
+              <span className="text-xs font-black">IG</span>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-800">Instagram sahifamiz</div>
+              <div className="text-[11px] text-pink-600 font-medium">{brandConfig.instagram}</div>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
+        </a>
+
+        <a
           href={`tel:${brandConfig.phoneNumber}`}
           className="w-full p-3.5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
         >
@@ -167,12 +185,12 @@ export function ProfileView({ onOpenAddressModal, onExploreMenu }: ProfileViewPr
 
         <div className="p-3.5 flex items-center justify-between text-left">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-stone-900 text-amber-400 flex items-center justify-center">
+              <span className="text-xs">🔥</span>
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-800">Halol Standart</div>
-              <div className="text-[11px] text-slate-400">100% Halol va sifatli mahsulotlar</div>
+              <div className="text-xs font-bold text-slate-800">Josper Ko&apos;mir Pechi</div>
+              <div className="text-[11px] text-slate-400">100% asl go&apos;sht va tabiiy ko&apos;mir tafti</div>
             </div>
           </div>
         </div>
@@ -180,10 +198,12 @@ export function ProfileView({ onOpenAddressModal, onExploreMenu }: ProfileViewPr
 
       {/* Brand Footer */}
       <div className="text-center pt-2 text-[10px] text-slate-400 space-y-1">
-        <p className="font-bold text-slate-500">
-          {brandConfig.brandName} • {brandConfig.city}
+        <p className="font-extrabold text-slate-600">
+          {brandConfig.brandName} • {brandConfig.brandSubName}
         </p>
-        <p>White-Label Telegram Mini App Demo</p>
+        <p className="text-[10px] text-slate-400">
+          {brandConfig.city} shahri bo&apos;ylab tezkor yetkazib berish
+        </p>
       </div>
     </div>
   );

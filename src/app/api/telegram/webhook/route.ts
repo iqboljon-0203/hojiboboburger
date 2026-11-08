@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import { brandConfig } from "@/config/brand";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -88,42 +90,91 @@ export async function POST(req: NextRequest) {
     const text = message.text;
     const user = message.from;
 
-    // 2. Handle /start command or general greeting
+    // 2. Handle /start command or general greeting with large photo
     if (text?.startsWith("/start") || text?.toLowerCase() === "start") {
       const welcomeText =
         `🍔 <b>${brandConfig.brandName}</b> ga xush kelibsiz, ${user?.first_name || "Aziz mehmon"}!\n\n` +
+        `🔥 <b>Josper Grill</b> — haqiqiy ko'mir taftida pishirilgan ASL shira bosgan burgerlar va taomlar!\n` +
         `🚀 <b>Tezkor yetkazib berish:</b> 30-35 daqiqa\n` +
         `🎁 <b>Aksiya:</b> 70 000 so'mdan yuqori buyurtmalar uchun yetkazib berish <b>bepul</b>!\n\n` +
         `Quyidagi tugma orqali ilovani oching va issiq burgerlarni tanlang:`;
 
-      // Send inline button
-      await fetch(`${telegramApiUrl}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: welcomeText,
-          parse_mode: "HTML",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: "🍽️ Taom Buyurtma Qilish (Mini App)",
-                  web_app: { url: APP_URL },
-                },
-              ],
-            ],
-          },
-        }),
-      });
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: "🍽️ Taom Buyurtma Qilish (Mini App)",
+              web_app: { url: APP_URL },
+            },
+          ],
+          [
+            {
+              text: "📞 Aloqa",
+              url: `tel:${brandConfig.phoneNumber.replace(/[^\d+]/g, "")}`,
+            },
+            {
+              text: "📍 Manzilimiz",
+              url: "https://maps.google.com/?q=HojiBobo+Burger+Toshkent",
+            },
+          ],
+        ],
+      };
 
-      // Also set the main bottom keyboard
+      // Check for welcome image on disk
+      const photoPath = path.join(process.cwd(), "public", "images", "bot-welcome.jpg");
+      let photoSent = false;
+
+      if (fs.existsSync(photoPath)) {
+        try {
+          const imageBuffer = fs.readFileSync(photoPath);
+          const formData = new FormData();
+          formData.append("chat_id", String(chatId));
+          formData.append(
+            "photo",
+            new Blob([imageBuffer], { type: "image/jpeg" }),
+            "hojibobo-welcome.jpg"
+          );
+          formData.append("caption", welcomeText);
+          formData.append("parse_mode", "HTML");
+          formData.append("reply_markup", JSON.stringify(inlineKeyboard));
+
+          const photoResp = await fetch(`${telegramApiUrl}/sendPhoto`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const photoData = await photoResp.json();
+          if (photoData.ok) {
+            photoSent = true;
+          } else {
+            console.warn("sendPhoto response error:", photoData);
+          }
+        } catch (photoErr) {
+          console.warn("Failed to send welcome photo:", photoErr);
+        }
+      }
+
+      // Fallback to text message if photo was not sent
+      if (!photoSent) {
+        await fetch(`${telegramApiUrl}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: welcomeText,
+            parse_mode: "HTML",
+            reply_markup: inlineKeyboard,
+          }),
+        });
+      }
+
+      // Send persistent bottom keyboard button
       await fetch(`${telegramApiUrl}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: "Pastdagi tugmani bosib ham ilovani ochishingiz mumkin:",
+          text: "Menyuni ko'rish uchun pastdagi tugmani bosing:",
           reply_markup: {
             keyboard: [
               [

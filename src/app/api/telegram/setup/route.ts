@@ -91,6 +91,61 @@ export async function POST(req: NextRequest) {
         `💰 <b>Jami:</b> 84 000 so'm\n\n` +
         `<i>Endi mijozlar ilova orqali bergan har bir buyurtma avtomatik tarzda ushbu guruhga tushadi!</i>`;
 
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: "📞 Mijozga qo'ng'iroq",
+              url: "tel:+998901234567",
+            },
+          ],
+          [
+            {
+              text: "✅ Qabul qilish",
+              callback_data: "accept_test",
+            },
+            {
+              text: "🛵 Kuryerga berish",
+              callback_data: "courier_test",
+            },
+          ],
+        ],
+      };
+
+      const photoPath = path.join(process.cwd(), "public", "images", "bot-welcome.jpg");
+      let sentPhoto = false;
+
+      if (fs.existsSync(photoPath)) {
+        try {
+          const imageBuffer = fs.readFileSync(photoPath);
+          const formData = new FormData();
+          formData.append("chat_id", chatId.trim());
+          formData.append(
+            "photo",
+            new Blob([imageBuffer], { type: "image/jpeg" }),
+            "welcome.jpg"
+          );
+          formData.append("caption", testOrderHtml);
+          formData.append("parse_mode", "HTML");
+          formData.append("reply_markup", JSON.stringify(inlineKeyboard));
+
+          const photoResp = await fetch(
+            `https://api.telegram.org/bot${botToken}/sendPhoto`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+          const photoData = await photoResp.json();
+          if (photoData.ok) {
+            sentPhoto = true;
+            return NextResponse.json({ success: true, data: photoData });
+          }
+        } catch (e) {
+          console.warn("Setup sendPhoto warning:", e);
+        }
+      }
+
       const resp = await fetch(
         `https://api.telegram.org/bot${botToken}/sendMessage`,
         {
@@ -100,26 +155,7 @@ export async function POST(req: NextRequest) {
             chat_id: chatId.trim(),
             text: testOrderHtml,
             parse_mode: "HTML",
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: "📞 Mijozga qo'ng'iroq",
-                    url: "tel:+998901234567",
-                  },
-                ],
-                [
-                  {
-                    text: "✅ Qabul qilish",
-                    callback_data: "accept_test",
-                  },
-                  {
-                    text: "🛵 Kuryerga berish",
-                    callback_data: "courier_test",
-                  },
-                ],
-              ],
-            },
+            reply_markup: inlineKeyboard,
           }),
         }
       );

@@ -53,6 +53,60 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, data });
     }
 
+    // Action 4: Auto-detect Group IDs via getUpdates
+    if (action === "findGroups") {
+      let resp = await fetch(
+        `https://api.telegram.org/bot${botToken}/getUpdates`
+      );
+      let data = await resp.json();
+
+      // If webhook is active, Telegram blocks getUpdates with code 409
+      if (!data.ok && data.error_code === 409) {
+        // Temporarily clear webhook to read updates
+        await fetch(`https://api.telegram.org/bot${botToken}/deleteWebhook`);
+        resp = await fetch(
+          `https://api.telegram.org/bot${botToken}/getUpdates`
+        );
+        data = await resp.json();
+      }
+
+      if (!data.ok) {
+        return NextResponse.json({
+          success: false,
+          error: data.description || "getUpdates xatoligi",
+        });
+      }
+
+      const groupsMap = new Map<
+        string,
+        { id: number; title: string; type: string }
+      >();
+
+      for (const update of data.result || []) {
+        const msg =
+          update.message || update.channel_post || update.my_chat_member;
+        const chat = msg?.chat;
+        if (
+          chat &&
+          (chat.type === "group" ||
+            chat.type === "supergroup" ||
+            chat.type === "channel")
+        ) {
+          groupsMap.set(String(chat.id), {
+            id: chat.id,
+            title: chat.title || "Guruh",
+            type: chat.type,
+          });
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        groups: Array.from(groupsMap.values()),
+        totalUpdates: data.result?.length || 0,
+      });
+    }
+
     // Action 2: Set Webhook
     if (action === "setWebhook") {
       if (!webhookUrl) {
